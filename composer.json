@@ -1,0 +1,17 @@
+{
+    "name": "betagt/plano",
+    "description": "",
+    "license": "MIT",
+    "type": "laravel-module",
+    "authors": [
+        {
+            "name": "Diuliano Oliveira",
+            "email": "diuliano0@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Modules\\Plano\\": ""
+        }
+    }
+}
