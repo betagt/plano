@@ -25,9 +25,14 @@ class FormaPgtoController extends BaseController
      * @var CacheService
      */
     private $cacheService;
+    /**
+     * @var PlanoContratacaoRepository
+     */
+    private $planoContratacaoRepository;
 
     public function __construct(
         FormaPagamentoRepository $formaPagamentoRepository,
+        PlanoContratacaoRepository $planoContratacaoRepository,
         PagSeguroService $pagSeguroService,
         CacheService $cacheService
     )
@@ -36,6 +41,7 @@ class FormaPgtoController extends BaseController
         parent::__construct($formaPagamentoRepository, FormaPgtoCriteria::class);
         $this->pagSeguroService = $pagSeguroService;
         $this->cacheService = $cacheService;
+        $this->planoContratacaoRepository = $planoContratacaoRepository;
     }
 
     /**
@@ -110,8 +116,12 @@ class FormaPgtoController extends BaseController
     public function pagamento(Request $request)
     {
         $data = $request->all();
+        \Validator::extend('check_free', function ($attribute, $value, $parameters, $validator) {
+            $count = $this->planoContratacaoRepository->skipPresenter(true)->findWhere(['user_id'=>$parameters[0],'total'=>0])->count();
+            return !($count > 10);
+        },'numero de contratações grátis excedidas');
         \Validator::make($data, [
-            'code_contratacao' => 'required|exists:plano_contratacaos,id',
+            'code_contratacao' => 'required|check_free:'.$this->getUserId(),
             'forma_pagamento' => 'required|exists:forma_pagamentos,slug',
             'method' => 'required',
             'hash' => 'required_if:method,CREDIT_CARD',
